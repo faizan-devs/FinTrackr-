@@ -118,6 +118,6 @@ dist
 .pnp.*
 
 # Ignore assets folder
-assets/
+# assets/
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
