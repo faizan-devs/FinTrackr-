@@ -119,6 +119,6 @@ dist
 
 # Ignore test file
 testEmail.js
-sendReortNow.js
+sendReportNow.js
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
