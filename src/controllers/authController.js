@@ -3,7 +3,7 @@ import User from '../models/User.js';
 import asyncHandler from 'express-async-handler';
 
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password, currency } = req.body;
+    const { name, email, password, currency, financialGoals, monthlyIncome } = req.body;
 
     const userExists = await User.findOne({ email });
 
@@ -16,7 +16,9 @@ const registerUser = asyncHandler(async (req, res) => {
         name,
         email,
         password,
-        currency: currency || 'USD',
+        currency: currency || 'INR',
+        financialGoals: financialGoals || [],
+        monthlyIncome: monthlyIncome || 0,
     });
 
     if (user) {
@@ -25,6 +27,8 @@ const registerUser = asyncHandler(async (req, res) => {
             name: user.name,
             email: user.email,
             currency: user.currency,
+            financialGoals: user.financialGoals,
+            monthlyIncome: user.monthlyIncome,
             token: generateToken(user._id),
         });
     } else {
@@ -44,6 +48,8 @@ const loginUser = asyncHandler(async (req, res) => {
             name: user.name,
             email: user.email,
             currency: user.currency,
+            financialGoals: user.financialGoals,
+            monthlyIncome: user.monthlyIncome,
             token: generateToken(user._id),
         });
     } else {
@@ -79,6 +85,12 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         user.currency = req.body.currency || user.currency;
         user.monthlyIncome = req.body.monthlyIncome || user.monthlyIncome;
 
+        // Update financialGoals if provided
+        if (req.body.financialGoals) {
+            user.financialGoals = req.body.financialGoals;
+        }
+
+        // Update password if provided
         if (req.body.password) {
             user.password = req.body.password;
         }
@@ -91,6 +103,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
             email: updatedUser.email,
             currency: updatedUser.currency,
             monthlyIncome: updatedUser.monthlyIncome,
+            financialGoals: updatedUser.financialGoals,
             token: generateToken(updatedUser._id),
         });
     } else {

@@ -28,10 +28,22 @@ const userSchema = new mongoose.Schema(
         },
         financialGoals: [
             {
-                name: String,
-                targetAmount: Number,
-                currentAmount: Number,
-                targetDate: Date,
+                name: {
+                    type: String,
+                    required: true,
+                },
+                targetAmount: {
+                    type: Number,
+                    required: true,
+                },
+                currentAmount: {
+                    type: Number,
+                    default: 0,
+                },
+                targetDate: {
+                    type: Date,
+                    required: true,
+                }
             },
         ],
     },
