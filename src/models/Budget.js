@@ -31,7 +31,7 @@ const budgetSchema = new mongoose.Schema(
         },
         threshold: {
             type: Number,
-            default: 80, // percentage at which to send warning
+            default: 90
         },
     },
     { timestamps: true }
