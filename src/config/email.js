@@ -41,7 +41,7 @@ export const sendBudgetAlertEmail = async (email, category, percentage, budgetAm
     await transporter.sendMail(mailOptions);
 };
 
-export const sendMonthlyReportEmail = async (email, name, reportData) => {
+export const sendMonthlyReportEmail = async (email, name, reportData, csvData) => {
     const mailOptions = {
         from: process.env.EMAIL_USERNAME,
         to: email,
@@ -68,6 +68,13 @@ export const sendMonthlyReportEmail = async (email, name, reportData) => {
         
         <p>Log in to your account for more detailed reports and insights.</p>
     `,
+        attachments: [
+            {
+                filename: `Monthly_Report_${new Date().toISOString().slice(0, 10)}.csv`,
+                content: csvData,
+                contentType: 'text/csv',
+            }
+        ]
     };
 
     await transporter.sendMail(mailOptions);
