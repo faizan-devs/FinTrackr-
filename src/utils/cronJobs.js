@@ -3,6 +3,8 @@ import { checkBudgetThresholds } from '../controllers/budgetController.js';
 import { sendMonthlyReportEmail } from '../config/email.js';
 import User from '../models/User.js';
 import Transaction from '../models/Transaction.js';
+import { Parser } from 'json2csv';
+import Budget from '../models/Budget.js';
 
 // Run every day at 9 AM
 cron.schedule('0 9 * * *', async () => {
@@ -60,12 +62,8 @@ cron.schedule('0 10 1 * *', async () => {
                     total: { $sum: '$amount' },
                 },
             },
-            {
-                $sort: { total: -1 },
-            },
-            {
-                $limit: 3,
-            },
+            { $sort: { total: -1 } },
+            { $limit: 3 },
         ]);
 
         // Get budget progress
@@ -104,7 +102,21 @@ cron.schedule('0 10 1 * *', async () => {
             })
         );
 
-        // Send email
+        // Fetch all transactions for the CSV
+        const transactions = await Transaction.find({
+            user: user._id,
+            date: {
+                $gte: new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1),
+                $lte: new Date(lastMonth.getFullYear(), lastMonth.getMonth() + 1, 0),
+            },
+        }).lean();
+
+        // Prepare CSV
+        const fields = ['date', 'type', 'category', 'amount', 'description', 'createdAt'];
+        const parser = new Parser({ fields });
+        const csv = parser.parse(transactions);
+
+        // Send email with CSV attachment
         await sendMonthlyReportEmail(
             user.email,
             user.name,
@@ -112,9 +124,13 @@ cron.schedule('0 10 1 * *', async () => {
                 totalIncome,
                 totalExpenses,
                 netSavings,
-                topExpenses,
+                topExpenses: topExpenses.map(te => ({
+                    category: te._id,
+                    amount: te.total,
+                })),
                 budgets: budgetProgress,
-            }
+            },
+            csv // CSV data as attachment
         );
     }
 });
